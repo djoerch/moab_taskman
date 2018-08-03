@@ -5,7 +5,7 @@ import time
 import shutil
 from datetime import datetime
 from enum import Enum
-from os import makedirs
+from os import makedirs, system
 from os.path import expandvars
 
 HOMEDIR = expandvars('$HOME')
@@ -113,6 +113,10 @@ class Taskman(object):
         # Generate id
         task_id = datetime.now().strftime("%m-%d_%H-%M-%S_%f")
         script_path, script_file = Job.get_path(task_name, task_id)
+
+        # Run pre exec bash script (to create a link to the helios job to execute next)
+        pre_exec_script = HOMEDIR + '/script_moab/submit_helios_job.sh'
+        system('python {} {}'.format(pre_exec_script, args_str))
 
         # Get template
         with open(HOMEDIR + '/script_moab/' + template_file + '.sh', 'r') as f:
