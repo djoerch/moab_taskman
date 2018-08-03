@@ -322,7 +322,7 @@ def _show_commands():
     for name, fn in sorted(cmds.items(), key=lambda x: x[0]):
         sig = inspect.signature(fn)
         params = list(sig.parameters.values())
-        print(name, ':', '; '.join([str(p) for p in params]))
+        print(name, ' '.join(['<' + str(p) + '>' for p in params]))
 
 
 def _match(pattern, name):
