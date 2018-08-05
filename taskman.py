@@ -5,7 +5,7 @@ import time
 import shutil
 from datetime import datetime
 from enum import Enum
-from os import makedirs, system
+from os import makedirs, system, popen
 from os.path import expandvars
 
 HOMEDIR = expandvars('$HOME')
@@ -43,12 +43,11 @@ class JobStatus(Enum):
 
 
 class Job(object):
-    def __init__(self, task_id, name, moab_id, status, template_file, args_str):
+    def __init__(self, task_id, name, moab_id, status, args_str):
         self.task_id = task_id
         self.moab_id = moab_id
         self.name = name
         self.status = status
-        self.template_file = template_file
         self.args_str = args_str
         self.report = {}
         self.finish_msg = ''
@@ -109,17 +108,18 @@ class Taskman(object):
         return lists['active j'], lists['eligible'], lists['blocked ']
 
     @staticmethod
-    def create_task(template_file, args_str, task_name):
+    def create_task(args_str, task_name):
         # Generate id
         task_id = datetime.now().strftime("%m-%d_%H-%M-%S_%f")
         script_path, script_file = Job.get_path(task_name, task_id)
 
         # Run pre exec script (to create a link to the helios job to execute next)
         pre_exec_script = HOMEDIR + '/script_moab/submit_helios_job.py'
-        system('python {} {}'.format(pre_exec_script, args_str))
+        cmd_result = popen('python {} --taskman {}'.format(pre_exec_script, args_str)).read().splitlines()[-1]
+        path_to_template_file = json.loads(cmd_result)['path_to_script']
 
         # Get template
-        with open(HOMEDIR + '/script_moab/' + template_file + '.sh', 'r') as f:
+        with open(path_to_template_file, 'r') as f:
             template = f.readlines()
 
         # Append post exec bash script
@@ -141,7 +141,7 @@ class Taskman(object):
             f.writelines(script_lines)
 
         print('Created', script_file)
-        return Job(task_id, task_name, None, None, template_file, args_str)
+        return Job(task_id, task_name, None, None, args_str)
 
     @staticmethod
     def write_started(job, db_file=None):
@@ -150,7 +150,7 @@ class Taskman(object):
         else:
             f = db_file
 
-        line = '{};{};{};{};{}'.format(job.task_id, job.name, job.moab_id, job.template_file, job.args_str)
+        line = '{};{};{};{}'.format(job.task_id, job.name, job.moab_id, job.args_str)
         f.write(line + '\n')
 
         if db_file is None:
@@ -208,8 +208,8 @@ class Taskman(object):
 
         jobs = {}
         for task_id, fields in sorted(started_tasks.items(), key=lambda x: x[1][0]):
-            name, moab_id, template_file, args_str = fields
-            j = Job(task_id, name, moab_id, None, template_file, args_str)
+            name, moab_id, args_str = fields
+            j = Job(task_id, name, moab_id, None, args_str)
 
             if moab_id in dead_tasks:
                 j.status = JobStatus.Dead
@@ -313,7 +313,7 @@ def _handle_command(cmd_str):
         cmds[cmd_name]()
     else:
         cmd_args = ' '.join(tokens[1:])
-        cmds[cmd_name](*cmd_args.split(';'))
+        cmds[cmd_name](*[s.strip() for s in cmd_args.split(';')])
 
 
 def _show_commands():
@@ -322,7 +322,7 @@ def _show_commands():
     for name, fn in sorted(cmds.items(), key=lambda x: x[0]):
         sig = inspect.signature(fn)
         params = list(sig.parameters.values())
-        print(name, ' '.join(['<' + str(p) + '>' for p in params]))
+        print(name, '; '.join(['<' + str(p) + '>' for p in params]))
 
 
 def _match(pattern, name):
@@ -332,13 +332,13 @@ def _match(pattern, name):
         return name == pattern
 
 
-def submit(template_file, args_str, task_name):
-    job = Taskman.create_task(template_file, args_str, task_name)
+def submit(args_str, task_name):
+    job = Taskman.create_task(args_str, task_name)
     Taskman.submit(job)
 
 
-def fromckpt(template_file, args_str, task_name, ckpt_file):
-    job = Taskman.create_task(template_file, args_str, task_name)
+def fromckpt(args_str, task_name, ckpt_file):
+    job = Taskman.create_task(args_str, task_name)
     print('Moving checkpoint...')
     job_dir = expandvars('$SCKPT') + '/' + job.name + '/' + job.task_id
     makedirs(job_dir)
@@ -381,7 +381,7 @@ def copy(task_name):
     submitted = set()
     for task_id, job in Taskman.jobs.items():
         if job.name not in submitted and _match(task_name, job.name):
-            job = Taskman.create_task(job.template_file, job.args_str, job.name)
+            job = Taskman.create_task(job.args_str, job.name)
             Taskman.submit(job)
             submitted.add(job.name)
 
@@ -390,14 +390,17 @@ def show(task_name):
     print()
     for task_id, job in Taskman.jobs.items():
         if _match(task_name, job.name):
-            print('\033[1m' + job.name + '\033[0m :', job.args_str)
-            print('\033[30;44m' + ' ' * 40 + '\rOutput\033[0m')
-            for l in Taskman.get_log(job)[-10:]:
-                print(l.strip())
-            print('\033[30;44m' + ' ' * 40 + '\rError\033[0m')
-            for l in Taskman.get_log(job, error_log=True)[-30:]:
-                print(l.strip())
-            print('\033[30;44m' + ' ' * 40 + '\033[0m')
+            try:
+                print('\033[1m' + job.name + '\033[0m :', job.args_str)
+                print('\033[30;44m' + ' ' * 40 + '\rOutput\033[0m')
+                for l in Taskman.get_log(job)[-10:]:
+                    print(l.strip())
+                    print('\033[30;44m' + ' ' * 40 + '\rError\033[0m')
+                for l in Taskman.get_log(job, error_log=True)[-30:]:
+                    print(l.strip())
+                    print('\033[30;44m' + ' ' * 40 + '\033[0m')
+            except FileNotFoundError:
+                continue
             print()
     input('Press any key...')
 
@@ -419,12 +422,12 @@ def clean(task_name=None):
 
     with open(DB_STARTED_TASKS, 'w') as f:
         for task_id, fields in started_tasks.items():
-            name, moab_id, template_file, args_str = fields
+            name, moab_id, args_str = fields
             remove = moab_id in dead_tasks or moab_id in finished_tasks
             if task_name is not None:
                 remove = _match(task_name, name) and remove
             if not remove:
-                job = Job(task_id, name, moab_id, None, template_file, args_str)
+                job = Job(task_id, name, moab_id, None, args_str)
                 Taskman.write_started(job, f)
 
 
