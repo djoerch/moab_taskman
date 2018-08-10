@@ -362,7 +362,7 @@ def multi_sub():
     r = input('Submit? (y/n)')
     if r == 'y':
         for i in a:
-            submit(*i.split(';'))
+            submit(*[s.strip() for s in i.split(';')])
 
 
 def continu(task_name):
@@ -390,17 +390,14 @@ def show(task_name):
     print()
     for task_id, job in Taskman.jobs.items():
         if _match(task_name, job.name):
-            try:
-                print('\033[1m' + job.name + '\033[0m :', job.args_str)
-                print('\033[30;44m' + ' ' * 40 + '\rOutput\033[0m')
-                for l in Taskman.get_log(job)[-10:]:
-                    print(l.strip())
-                    print('\033[30;44m' + ' ' * 40 + '\rError\033[0m')
-                for l in Taskman.get_log(job, error_log=True)[-30:]:
-                    print(l.strip())
-                    print('\033[30;44m' + ' ' * 40 + '\033[0m')
-            except FileNotFoundError:
-                continue
+            print('\033[1m' + job.name + '\033[0m :', job.args_str)
+            print('\033[30;44m' + ' ' * 40 + '\rOutput\033[0m')
+            for l in Taskman.get_log(job)[-10:]:
+                print(l.strip())
+                print('\033[30;44m' + ' ' * 40 + '\rError\033[0m')
+            for l in Taskman.get_log(job, error_log=True)[-30:]:
+                print(l.strip())
+                print('\033[30;44m' + ' ' * 40 + '\033[0m')
             print()
     input('Press any key...')
 
