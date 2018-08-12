@@ -90,7 +90,7 @@ class Taskman(object):
             return None, None, None
 
         showq_lines = output.split('\n')
-        showq_lines = [l.strip() for l in showq_lines]
+        showq_lines = [_l.strip() for _l in showq_lines]
         lists = {'active j': [], 'eligible': [], 'blocked ': []}
         cur_list = None
         for line in showq_lines:
@@ -195,9 +195,9 @@ class Taskman(object):
         with open(HOMEDIR + '/taskman/finished', 'r') as f:
             finished_tasks_csv = f.readlines()
 
-        started_tasks = {tokens[0]: tokens[1:] for tokens in [l.strip().split(';') for l in started_tasks_csv]}
-        dead_tasks = {tokens[0]: tokens[1:] for tokens in [l.strip().split(',') for l in dead_tasks_csv]}
-        finished_tasks = {tokens[0]: tokens[1:] for tokens in [l.strip().split(',') for l in finished_tasks_csv]}
+        started_tasks = {tokens[0]: tokens[1:] for tokens in [_l.strip().split(';') for _l in started_tasks_csv]}
+        dead_tasks = {tokens[0]: tokens[1:] for tokens in [_l.strip().split(',') for _l in dead_tasks_csv]}
+        finished_tasks = {tokens[0]: tokens[1:] for tokens in [_l.strip().split(',') for _l in finished_tasks_csv]}
         return started_tasks, dead_tasks, finished_tasks
 
     @staticmethod
@@ -362,7 +362,7 @@ def multi_sub():
     r = input('Submit? (y/n)')
     if r == 'y':
         for i in a:
-            submit(*i.split(';'))
+            submit(*[s.strip() for s in i.split(';')])
 
 
 def continu(task_name):
