@@ -290,8 +290,8 @@ class Taskman(object):
             elif job.status == JobStatus.Blocked:
                 status_line = '\033[30;47m' + status_line + '\033[0m'
             elif job.status == JobStatus.Finished:
-                finished_status = {'ok': '\033[32;107mFinished\033[;107m',  # Green
-                                   'cancel': '\033[;107mCancel\'d'  # Black
+                finished_status = {'ok': '\033[32;107mFinished\033[;42m',  # Green (fg and bg)
+                                   'cancel': '\033[30;107mCancel\'d\033[;40m'  # Black (fg and bg)
                                    }.get(job.finish_msg, '\033[;107mFinished')
                 status_line = finished_status + status_line[8:] + '\033[0m'
             print(status_line)
