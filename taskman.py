@@ -5,7 +5,7 @@ import time
 import shutil
 from datetime import datetime
 from enum import Enum
-from os import makedirs, system, popen
+from os import makedirs, popen
 from os.path import expandvars
 
 HOMEDIR = expandvars('$HOME')
@@ -395,10 +395,10 @@ def show(task_name):
                 print('\033[30;44m' + ' ' * 40 + '\rOutput\033[0m')
                 for l in Taskman.get_log(job)[-10:]:
                     print(l.strip())
-                    print('\033[30;44m' + ' ' * 40 + '\rError\033[0m')
+                print('\033[30;44m' + ' ' * 40 + '\rError\033[0m')
                 for l in Taskman.get_log(job, error_log=True)[-30:]:
                     print(l.strip())
-                    print('\033[30;44m' + ' ' * 40 + '\033[0m')
+                print('\033[30;44m' + ' ' * 40 + '\033[0m')
             except FileNotFoundError:
                 continue
             print()
