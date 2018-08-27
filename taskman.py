@@ -114,7 +114,7 @@ class Taskman(object):
         script_path, script_file = Job.get_path(task_name, task_id)
 
         # Run pre exec script (to create a link to the helios job to execute next)
-        pre_exec_script = HOMEDIR + '/script_moab/submit_helios_job.py'
+        pre_exec_script = HOMEDIR + '/script_moab/vslic_submit_helios_job.py'
         cmd_result = popen('python {} --taskman {}'.format(pre_exec_script, args_str)).read().splitlines()[-1]
         path_to_template_file = json.loads(cmd_result)['path_to_script']
 
