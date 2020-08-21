@@ -4,9 +4,12 @@ import time
 
 from taskman import Taskman
 from taskman.commands import handle_command, show_commands
+from taskman.utils import assert_environment_exists
 
 
 if __name__ == '__main__':
+
+    assert_environment_exists()
 
     while True:
 

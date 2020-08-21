@@ -137,7 +137,6 @@ class Taskman(object):
 
         print('Submitted.  TaskmanID: {}  Moab/SLURM ID: {}'.format(job.task_id, job.moab_id))
 
-
     @staticmethod
     def cancel(task_id):
         job = Taskman.jobs[task_id]
