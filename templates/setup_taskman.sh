@@ -67,6 +67,7 @@ fi
 
 # create root folder
 mkdir -p ${PATH_TO_TASKMAN_ROOT}/scripts
+mkdir -p ${HOME}/logs
 
 # copy template scripts
 cp ${PATH_TO_REPO}/templates/template.sh ${PATH_TO_TASKMAN_ROOT}/scripts/
