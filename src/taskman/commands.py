@@ -10,7 +10,7 @@ from . import CKPT_FOLDER, HOMEDIR, DB_STARTED_TASKS
 
 
 def handle_command(cmd_str):
-    tokens = cmd_str.split(' ')
+    tokens = cmd_str.split(' ', maxsplit=1)
     cmd_name = tokens[0]
     if cmd_name == '':
         return
@@ -18,7 +18,7 @@ def handle_command(cmd_str):
         cmds[cmd_name]()
     else:
         cmd_args = ' '.join(tokens[1:])
-        cmds[cmd_name](*cmd_args.split(';'))
+        cmds[cmd_name](*[arg.strip() for arg in cmd_args.split(';')])
 
 
 def show_commands():
