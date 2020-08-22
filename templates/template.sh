@@ -1,9 +1,12 @@
 #!/bin/bash
 
-#SBATCH --time=00:15:00
+#SBATCH --time=10:00:00
 #SBATCH --account=def-descotea
 #SBATCH --gres=gpu:1
 #SBATCH --cpus-per-task=4
+#SBATCH --output=/home/jord2201/logs/$TASKMAN_NAME.o%j
+#SBATCH --error=/home/jord2201/logs/$TASKMAN_NAME.e%j
+
 
 module load singularity
 
