@@ -6,10 +6,10 @@ if [[ ${exec_status} -eq 0 ]]
 then
 
     # Finished without errors
-    echo "$MOAB_JOBID,$TASKMAN_NAME,ok" >> ${HOME}/taskman/finished
+    echo "${SLURM_JOB_ID},$TASKMAN_NAME,ok" >> ${HOME}/taskman/finished
 
 else
 
-    echo "$MOAB_JOBID,$TASKMAN_NAME,${exec_status}" >> ${HOME}/taskman/dead
+    echo "${SLURM_JOB_ID},$TASKMAN_NAME,${exec_status}" >> ${HOME}/taskman/dead
 
 fi
