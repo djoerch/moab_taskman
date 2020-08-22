@@ -11,7 +11,7 @@ cd ${HOME}/git/repositories/vslic/containerization/singularity
 
 bash vslic_run_in_singularity.sh \
   --data-mount-path ${SCRATCH}/vslic_test_dir \
-  --venv-mount-path ${SCRATCH}/vslic_test_venv \
+  --venv-mount-path ${SCRATCH}/vslic_test_venv_3 \
   --code-mount-path ${HOME}/git/repositories/vslic \
   --singularity-image ${SCRATCH}/vslic-3.sif \
   vslic_classify_streamlines.py -c ${SCRATCH}/vslic_test_dir/configs/$TASKMAN_ARGS
