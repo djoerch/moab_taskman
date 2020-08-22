@@ -63,7 +63,7 @@ class Taskman(object):
 
     @staticmethod
     def get_slurm_queue():
-        args = ['squeue', '-u', expandvars('$USER')]
+        args = ['squeue', '-u', expandvars('$USER'), '-o %A|%t']
         output = Taskman.get_cmd_output(args, timeout=10)
         if output is None:
             return None
@@ -72,8 +72,11 @@ class Taskman(object):
         showq_lines = [l for l in showq_lines]
         statuses = {}
         for line in showq_lines[1:]:  # skip header
-            slurm_id = line[:8].strip()
-            slurm_state = line[47:50].strip()
+            args = line.split('|')
+            if len(args) != 2:
+                continue
+            slurm_id = args[0].strip()
+            slurm_state = args[1].strip()
             statuses[slurm_id] = slurm_state
         return statuses
 
@@ -162,7 +165,7 @@ class Taskman(object):
         with open(HOMEDIR + '/taskman/finished', 'r') as f:
             finished_tasks_csv = f.readlines()
 
-        if started_tasks_csv[0].strip() == '':
+        if not started_tasks_csv or started_tasks_csv[0].strip() == '':
             started_tasks = None
         else:
             started_tasks = {tokens[0]: tokens[1:] for tokens in [l.strip().split(';')
