@@ -11,7 +11,7 @@
 module load singularity
 
 # Set shutdown time
-export HANGUP_TIME=$(($(date +"%s") + 12 * 3600))
+export HANGUP_TIME=$(($(date +"%s") + 10 * 3600))
 
 cd ${HOME}/git/repositories/vslic/containerization/singularity
 
