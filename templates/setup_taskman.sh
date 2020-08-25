@@ -71,8 +71,10 @@ mkdir -p ${PATH_TO_TASKMAN_ROOT}/old
 mkdir -p ${HOME}/logs
 
 # copy template scripts
-cp ${PATH_TO_REPO}/templates/template.sh ${PATH_TO_TASKMAN_ROOT}/scripts/
-cp ${PATH_TO_REPO}/templates/taskman_post_exec.sh ${PATH_TO_TASKMAN_ROOT}/scripts/
+for taskman_script in prepare.sh train.sh eval.sh taskman_post_exec.sh
+do
+    cp ${PATH_TO_REPO}/templates/${taskman_script} ${PATH_TO_TASKMAN_ROOT}/scripts/
+done
 
 # setup environment variables
 export TASKMAN_USE_SLURM=True
